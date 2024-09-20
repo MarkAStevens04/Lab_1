@@ -230,7 +230,24 @@ def return_entry_titles():
         print(header_title)
     return titles
 
+def extract_errors(params):
+    """
+    Takes a matrix [[entry 1, entry 1 + error, entry 1 - error], [...], ...]
+    and extracts the error!
+    Returns:
 
+    [entry 1, entry 2, entry 3, ...], [[entry1 + error, entry2 + error, ...], [entry1 - error, entry2 - error, ...]]
+
+    :return:
+    """
+    errors = params[:, -2:]
+    errors[:, 0] = params[:, 0] - params[:, 1]
+    errors[:, 1] = params[:, 0] - params[:, 2]
+    errors = np.abs(errors)
+    errors = np.transpose(errors)
+    print(f'errors: {errors}')
+    params = params[:, 0]
+    return params, errors
 
 
 # Press the green button in the gutter to run the script.
@@ -266,31 +283,31 @@ if __name__ == '__main__':
         std = np.std(periods, axis=0)
 
         datapoints[i, :] = [mean[1], std[1]]
+    print(f'datapoints: {datapoints}')
 
     # print(f'datapoints: {datapoints}')
     # print(f'datapoints: {datapoints[:, 0]}')
 
 
     params = np.array([0, 0, 0, 5, 5, 5, 10, 10, 10, 15, 15, 15, 20, 20, 20, 25, 25, 25, 30, 30, 30, 35, 35, 35, 40, 40, 40, 70, 70, 70])
-    # helps us track our error
-    # param_error = [0.5]
-    # params = np.concatenate((params, param_error))
+    # , 70, 70, 70
+    p_error = 0.5
 
-    # params = (params * 75.7 + 27.4 * 27.8) / (75.7 + 27.8)
+    # carries error through transformations
+    params = np.c_[params, params + [0.5] * params.shape[0], params - [0.5] * params.shape[0]]
+
+    # change params to plot
     params = np.cos(params * ((2 * np.pi)/360))
     params = 1 / params
     params = np.sqrt(params)
 
-    # p_error = params[-1]
-    # params = params[:-1]
-    p_error = 2
-    print(f'p_error: {p_error}')
-    # params = np.divide(params, 100)
-    # print(f'params: {params}')
-    # params = np.sqrt(params)
-    # print(f'params: {params}')
-    reg_line = lin_reg_on_param(params, datapoints[:, 0])
+    # extract errors from params
+    # if you want a constant error, delete the line that concatenates the error and the next line, and set the errors to a constant value.
+    params, errors = extract_errors(params)
 
+
+    # perform our linear regression
+    reg_line = lin_reg_on_param(params, datapoints[:, 0])
 
     # obtain the means and standard deviations from datapoints array
     all_means = datapoints[:, 0]
@@ -340,7 +357,7 @@ if __name__ == '__main__':
 
     # plot datapoints with error bars
     sns.scatterplot(ax=ax, x=params, y=all_means, label='original_data')
-    plt.errorbar(x=params, y=all_means, yerr=all_std, xerr=(0.0005 ** 0.5), fmt='.', color='blue', ecolor='lightgray')
+    plt.errorbar(x=params, y=all_means, yerr=all_std, xerr=errors, fmt='.', color='blue', ecolor='lightgray')
 
 
     # add little text with description of linear regression
