@@ -255,7 +255,7 @@ if __name__ == '__main__':
 
     new_row_name = "time"
 
-    raw_data = pd.read_csv('Data/Exercise 4.csv')
+    raw_data = pd.read_csv('Data/Exercise 5.csv')
 
     starts = find_trials(raw_data)
     trial_frames = create_dataframes(raw_data, starts)
