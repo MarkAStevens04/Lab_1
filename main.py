@@ -87,6 +87,8 @@ def all_to_numpy(data_frames):
     np_arrays = []
     for df in data_frames:
         new = df.to_numpy()
+        # remove NaNs from dataset
+        new = new[~np.isnan(new).any(axis=1), :]
         np_arrays.append(new)
 
 
@@ -107,16 +109,18 @@ def find_peaks(data_frame):
 
     # dist ensures peaks are far enough away.
     # This way, we're not selecting multiple points for the same peak!
-    dist = 20
+    dist = 3
 
     # size checks that it is a peak relative to this many datapoints away.
     # Noise might be a local maximum relative to the nearest 2 datapoints, but
     # is actually part of a local minimum when considering the nearest 20 points!
     # that they are peaks rel
-    size = 20
+    size = 2
 
     pos = data_frame[:, 1]
     neg = data_frame[:, 1] * -1
+
+    print(f'finding peaks: {data_frame}')
 
     peaks = sp.signal.find_peaks(pos, distance=dist, width=size)
     valleys = sp.signal.find_peaks(neg, distance=dist, width=size)
@@ -191,13 +195,19 @@ if __name__ == '__main__':
 
     new_row_name = "time"
 
-    raw_data = pd.read_csv('Data/Exercise 1.csv')
+    raw_data = pd.read_csv('Data/Exercise 4.csv')
 
     starts = find_trials(raw_data)
     trial_frames = create_dataframes(raw_data, starts)
 
+    # print(f'found frames: {trial_frames}')
+
     t1 = all_to_numpy(trial_frames)
+    # print(f'turned to numpy: {t1}')
     peaks = find_peaks(t1[0])
+    print(f'peaks: {peaks}')
+
+
 
     all_periods = []
     all_means = []
@@ -242,6 +252,10 @@ if __name__ == '__main__':
 
     f, ax = plt.subplots(1, 1, figsize=(10, 10))
 
+    # ------ Debug Peak Finding -----
+
+
+
 
     # ------ Position and Velocity -----
 
@@ -253,29 +267,28 @@ if __name__ == '__main__':
 
 
 
-
     # ------ Linear Regression -----
 
-    # # plot datapoints with error bars
-    # sns.scatterplot(ax=ax, x=params, y=all_means, label='original_data')
-    # plt.errorbar(x=params, y=all_means, yerr=all_std, xerr=(0.0005 ** 0.5), fmt='.', color='blue', ecolor='lightgray')
-    #
-    #
-    # # add little text with description of linear regression
-    # add_string = f'y = {reg_line.slope :.4f} * x + {reg_line.intercept :.4f}\n'
-    # add_string += f'r^2 = {reg_line.rvalue :.4f}\n'
-    # add_string += f'stderr = {reg_line.stderr :.6f}'
-    # ax.text(0.375, 1.05, add_string, fontsize=10)
-    #
-    # # create values to plot linear regression line
-    # x_vals = np.array([np.amax(params), np.amin(params)])
-    # y_vals = reg_line.intercept + reg_line.slope * x_vals
-    #
-    # # plot linear regression line
-    # sns.lineplot(ax=ax, x=x_vals, y=y_vals, color="r", label=f'linear regression:\n{reg_line.slope :.4f} * x + {reg_line.intercept :.4f}')
-    #
-    # # label axis
-    # ax.set(xlabel='Sqrt of Length of Pendulum (m^1/2)', ylabel='Mean Period (sec)', title='Mean Period Against Length of Pendulum')
+    # plot datapoints with error bars
+    sns.scatterplot(ax=ax, x=params, y=all_means, label='original_data')
+    plt.errorbar(x=params, y=all_means, yerr=all_std, xerr=(0.0005 ** 0.5), fmt='.', color='blue', ecolor='lightgray')
+
+
+    # add little text with description of linear regression
+    add_string = f'y = {reg_line.slope :.4f} * x + {reg_line.intercept :.4f}\n'
+    add_string += f'r^2 = {reg_line.rvalue :.4f}\n'
+    add_string += f'stderr = {reg_line.stderr :.6f}'
+    ax.text(0.375, 1.05, add_string, fontsize=10)
+
+    # create values to plot linear regression line
+    x_vals = np.array([np.amax(params), np.amin(params)])
+    y_vals = reg_line.intercept + reg_line.slope * x_vals
+
+    # plot linear regression line
+    sns.lineplot(ax=ax, x=x_vals, y=y_vals, color="r", label=f'linear regression:\n{reg_line.slope :.4f} * x + {reg_line.intercept :.4f}')
+
+    # label axis
+    ax.set(xlabel='Sqrt of Length of Pendulum (m^1/2)', ylabel='Mean Period (sec)', title='Mean Period Against Length of Pendulum')
 
 
     plt.legend()
