@@ -244,13 +244,12 @@ if __name__ == '__main__':
 
 
     # ------ Position and Velocity -----
-    print(t1[0][:, 1])
-    position = t1[0][:, 1]
-    velocity = t1[0][:, 2]
-    print(t1[0])
-    sns.scatterplot(ax=ax, x=position, y=velocity, label='length=0.309m')
-    # sns.histplot(x=position, y=velocity, stat='density', bins=20, pthresh=.0000001, cmap="mako")
-    ax.set(xlabel='Angular Position (rad)', ylabel='Angular Velocity (rad/sec)', title='Position against velocity at 0.309m')
+
+    # position = t1[0][:, 1]
+    # velocity = t1[0][:, 2]
+    # sns.scatterplot(ax=ax, x=position, y=velocity, label='length=0.309m')
+    # # sns.histplot(x=position, y=velocity, stat='density', bins=20, pthresh=.0000001, cmap="mako")
+    # ax.set(xlabel='Angular Position (rad)', ylabel='Angular Velocity (rad/sec)', title='Position against velocity at 0.309m')
 
 
 
