@@ -8,6 +8,9 @@ import scipy as sp
 E1 = "C:/Users/doyle/OneDrive/Desktop/Programming/Python/School/PHY245/Lab_1/Data/Exercise 1.csv"
 
 
+entry_names = []
+
+
 def find_trials(data_frame):
     """
     Combs through the headers and returns a list of all the columns
@@ -50,6 +53,7 @@ def create_dataframes(data_frame, index_list):
         end_i = index_list[f+1]
         new_df = data_frame.iloc[:, start_i:end_i]
         trials.append(new_df)
+        entry_names.append(new_df.columns)
 
 
     data_frames = []
@@ -62,6 +66,7 @@ def create_dataframes(data_frame, index_list):
             for name in trial.columns:
                 if c_name.split()[:2] == name.split()[:2]:
                     name_dict[new_names[i]] = name
+
 
         # value_dict maps the name in new_names to the data held by the trial's dataframe
         value_dict = dict()
@@ -78,7 +83,8 @@ def create_dataframes(data_frame, index_list):
 
 def all_to_numpy(data_frames):
     """
-    Converts the list of dataframes to numpy arrays
+    Converts the list of dataframes to numpy arrays.
+    Also removes columns which are all NaN
 
     Goes time, position, velocity
     :param data_frames:
@@ -87,9 +93,18 @@ def all_to_numpy(data_frames):
     np_arrays = []
     for df in data_frames:
         new = df.to_numpy()
-        # remove NaNs from dataset
-        new = new[~np.isnan(new).any(axis=1), :]
-        np_arrays.append(new)
+        # remove rows from dataset if every entry is NaN
+
+        # extract full array but with NaN replaced with True and else replaced with False
+        a = np.isnan(new)
+        # create 1-D slide of array
+        # True if every entry in original row was True
+        # False if at least one entry was False
+        # Should be Nx1 array, with N=number datapoints
+        b = ~np.all(a, axis=1)
+        # C is our original array indexed at these new values
+        c = new[b]
+        np_arrays.append(c)
 
 
     return np_arrays
@@ -120,7 +135,7 @@ def find_peaks(data_frame):
     pos = data_frame[:, 1]
     neg = data_frame[:, 1] * -1
 
-    print(f'finding peaks: {data_frame}')
+    # print(f'finding peaks: {data_frame}')
 
     peaks = sp.signal.find_peaks(pos, distance=dist, width=size)
     valleys = sp.signal.find_peaks(neg, distance=dist, width=size)
@@ -187,6 +202,34 @@ def lin_reg_on_param(parameter, data):
     return res
 
 
+def return_entry_titles():
+    """
+    Return the titles of the entries!
+    Uses the entry_names array
+    :return:
+    """
+    # index where the name is located
+    name_index = 0
+
+    # number of words in title to include
+    num_words = 1
+
+    titles = []
+    for headers in entry_names:
+        # get the header
+        header_title_full = headers[name_index]
+        # extract the last word of the full header title
+        header_title_split = header_title_full.split()[-1 * num_words:]
+        # extract that phrase
+        header_title = ''
+        for h in header_title_split:
+            header_title += h
+            header_title += ' '
+        header_title = header_title[:-1]
+        titles.append(header_title)
+        print(header_title)
+    return titles
+
 
 
 
@@ -205,7 +248,7 @@ if __name__ == '__main__':
     t1 = all_to_numpy(trial_frames)
     # print(f'turned to numpy: {t1}')
     peaks = find_peaks(t1[0])
-    print(f'peaks: {peaks}')
+    # print(f'peaks: {peaks}')
 
 
 
@@ -228,13 +271,24 @@ if __name__ == '__main__':
     # print(f'datapoints: {datapoints[:, 0]}')
 
 
-    params = np.array([30.9, 30.9, 30.9, 30.1, 30.1, 30.1, 28.2, 28.2, 28.2, 26.4, 26.4, 26.4, 23.2, 23.2, 23.2, 19.2, 19.2, 19.2, 16.5, 16.5, 16.5, 12.2, 12.2, 12.2, 9.6, 9.6, 9.6, 33.9, 33.9, 33.9])
-    params = (params * 75.7 + 27.4 * 27.8) / (75.7 + 27.8)
+    params = np.array([0, 0, 0, 5, 5, 5, 10, 10, 10, 15, 15, 15, 20, 20, 20, 25, 25, 25, 30, 30, 30, 35, 35, 35, 40, 40, 40, 70, 70, 70])
+    # helps us track our error
+    # param_error = [0.5]
+    # params = np.concatenate((params, param_error))
 
-    params = np.divide(params, 100)
-    print(f'params: {params}')
+    # params = (params * 75.7 + 27.4 * 27.8) / (75.7 + 27.8)
+    params = np.cos(params * ((2 * np.pi)/360))
+    params = 1 / params
     params = np.sqrt(params)
-    print(f'params: {params}')
+
+    # p_error = params[-1]
+    # params = params[:-1]
+    p_error = 2
+    print(f'p_error: {p_error}')
+    # params = np.divide(params, 100)
+    # print(f'params: {params}')
+    # params = np.sqrt(params)
+    # print(f'params: {params}')
     reg_line = lin_reg_on_param(params, datapoints[:, 0])
 
 
@@ -242,11 +296,10 @@ if __name__ == '__main__':
     all_means = datapoints[:, 0]
     all_std = datapoints[:, 1]
 
-    # print(f'all_means and all_std:')
-    # for row in datapoints:
-    #     print(f'{row[0]}')
-    #
-    # for row in all_means:
+    print(f'all_means and all_std:')
+    for row in all_means:
+        print(row)
+    # for row in all_std:
     #     print(row)
 
 
@@ -254,7 +307,23 @@ if __name__ == '__main__':
 
     # ------ Debug Peak Finding -----
 
-
+    # # num trials per segment
+    # # If you do 3 trials at 30.9m, your trials per segment is 3
+    # tps = 3
+    # i = 8
+    #
+    # f, ax = plt.subplots(tps, 1, figsize=(20, 10))
+    # e_titles = return_entry_titles()
+    #
+    #
+    #
+    # for c in range(tps):
+    #     index = i * tps + c
+    #     peaks = find_peaks(t1[index])
+    #     periods = calc_periods(peaks)
+    #     sns.scatterplot(ax=ax[c], x=t1[index][:, 0], y=t1[index][:, 1])
+    #     sns.scatterplot(ax=ax[c], x=peaks[:, 0], y=peaks[:, 1], hue=peaks[:, 3], palette="ch:r=-.5,l=.75")
+    #     ax[c].set(title=e_titles[index])
 
 
     # ------ Position and Velocity -----
