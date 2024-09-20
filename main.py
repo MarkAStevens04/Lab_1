@@ -283,7 +283,6 @@ if __name__ == '__main__':
         std = np.std(periods, axis=0)
 
         datapoints[i, :] = [mean[1], std[1]]
-    print(f'datapoints: {datapoints}')
 
     # print(f'datapoints: {datapoints}')
     # print(f'datapoints: {datapoints[:, 0]}')
@@ -296,7 +295,7 @@ if __name__ == '__main__':
     p_error = 0.1
 
     # carries error through transformations
-    params = np.c_[params, params + [0.5] * params.shape[0], params - [0.5] * params.shape[0]]
+    params = np.c_[params, params + [p_error] * params.shape[0], params - [p_error] * params.shape[0]]
 
     # change params to plot
     # params = params / 1000
@@ -316,8 +315,13 @@ if __name__ == '__main__':
     print(f'all_means and all_std:')
     for row in all_means:
         print(row)
-    # for row in all_std:
-    #     print(row)
+    print(f'')
+
+    print(f'all_std:')
+    for row in all_std:
+        print(row)
+
+    print(f'')
 
 
     f, ax = plt.subplots(1, 1, figsize=(10, 10))
