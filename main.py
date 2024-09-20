@@ -289,17 +289,17 @@ if __name__ == '__main__':
     # print(f'datapoints: {datapoints[:, 0]}')
 
 
-    params = np.array([0, 0, 0, 5, 5, 5, 10, 10, 10, 15, 15, 15, 20, 20, 20, 25, 25, 25, 30, 30, 30, 35, 35, 35, 40, 40, 40, 70, 70, 70])
+    # params = np.array([16.2, 16.2, 16.2, 16.2, 16.2, 16.2, 16.3677095, 16.3677095, 16.3677095, 16.49453616, 16.49453616, 16.49453616, 16.47455317, 16.47455317, 16.47455317])
+    params = np.array([27.8, 27.8, 27.8, 103.5, 103.5, 103.5, 179, 179, 179, 254.4, 254.4, 254.4, 330.1, 330.1, 330.1])
+
     # For exercise 4, should do errors-in-variables regression
-    p_error = 0.5
+    p_error = 0.1
 
     # carries error through transformations
     params = np.c_[params, params + [0.5] * params.shape[0], params - [0.5] * params.shape[0]]
 
     # change params to plot
-    params = np.cos(params * ((2 * np.pi)/360))
-    params = 1 / params
-    params = np.sqrt(params)
+    # params = params / 1000
 
     # extract errors from params
     # if you want a constant error, delete the line that concatenates the error and the next line, and set the errors to a constant value.
@@ -327,7 +327,7 @@ if __name__ == '__main__':
     # # num trials per segment
     # # If you do 3 trials at 30.9m, your trials per segment is 3
     # tps = 3
-    # i = 8
+    # i = 2
     #
     # f, ax = plt.subplots(tps, 1, figsize=(20, 10))
     # e_titles = return_entry_titles()
@@ -367,7 +367,7 @@ if __name__ == '__main__':
 
     # x and y are positions on graph where top left corner should be.
     # x and y values are values of each variable (like 0.1 radians or something)
-    ax.text(1.0, 1.7, add_string, fontsize=10)
+    ax.text(25, 0.7, add_string, fontsize=10)
 
     # create values to plot linear regression line
     x_vals = np.array([np.amax(params), np.amin(params)])
@@ -377,9 +377,9 @@ if __name__ == '__main__':
     sns.lineplot(ax=ax, x=x_vals, y=y_vals, color="r", label=f'linear regression:\n{reg_line.slope :.4f} * x + {reg_line.intercept :.4f}')
 
     # label axis
-    ax.set(xlabel='Inverse Root Cosine of Inclination Angle  ($\\frac{1}{\\sqrt{cos(\\theta)}}$)', ylabel='Mean Period (sec)', title='Mean Period Against Inclination')
+    ax.set(xlabel='Total weight of oscillator (g)', ylabel='Mean Period (sec)', title='Mean Period Against Weight')
 
-
+    plt.ylim(0)
     plt.legend()
     plt.show()
 
