@@ -237,8 +237,6 @@ if __name__ == '__main__':
     plotDF = trial_frames[0]
 
 
-    # plotDF = pd.DataFrame(data=trial, columns=["Time (s) E2-L1-319-T1", "Angle (rad) E2-L1-319-T1"])
-
     # sns.set_color_codes("pastel")
     # f, ax = plt.subplots(3, 1, figsize=(20, 10))
     f, ax = plt.subplots(1, 1, figsize=(6, 6))
