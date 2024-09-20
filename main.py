@@ -133,7 +133,6 @@ def find_peaks(data_frame):
 
 
 
-
 def calc_periods(max_min_rows):
     """
     Calculates the periods for the trials!
@@ -170,10 +169,22 @@ def calc_periods(max_min_rows):
     return total
 
 
+def lin_reg_on_param(parameter, data):
+    """
+    Takes an array of parameters and an array of data.
+    Then performs a linear regression on the data based on the parameter.
+
+    Initially used to create linear regressions from the average period against the length of the pendulum.
+    :param parameter:
+    :param data:
+    :return:
+    """
+    res = sp.stats.linregress(parameter, data)
+    return res
 
 
 
-# plotDF = pd.DataFrame(data=trial, columns=["Time (s) E2-L1-319-T1", "Angle (rad) E2-L1-319-T1"])
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -190,78 +201,86 @@ if __name__ == '__main__':
 
     all_periods = []
     all_means = []
-    for entry in t1:
+    all_std = []
+    datapoints = np.zeros((len(t1), 2))
+
+    print(f't1size {len(t1)}')
+    for i, entry in enumerate(t1):
         peaks = find_peaks(entry)
         periods = calc_periods(peaks)
         all_periods.append(periods)
-        print(f'mean: {np.mean(periods, axis=0)}')
+        # print(f'mean: {np.mean(periods, axis=0)}')
         mean = np.mean(periods, axis=0)
-        all_means.append(mean[1])
+        std = np.std(periods, axis=0)
+
+        datapoints[i, :] = [mean[1], std[1]]
+
+
+    # print(f'datapoints: {datapoints}')
+    # print(f'datapoints: {datapoints[:, 0]}')
+
+
+    params = [30.9, 30.9, 30.9, 30.1, 30.1, 30.1, 28.2, 28.2, 28.2, 26.4, 26.4, 26.4, 23.2, 23.2, 23.2, 19.2, 19.2, 19.2, 16.5, 16.5, 16.5, 12.2, 12.2, 12.2, 9.6, 9.6, 9.6, 33.9, 33.9, 33.9]
+    reg_line = lin_reg_on_param(params, datapoints[:, 0])
+
+
+
+    all_means = datapoints[:, 0]
+    all_std = datapoints[:, 1]
 
     print(f'all means: {all_means}')
-    # periods = calc_periods(peaks)
 
 
 
 
 
     plotDF = trial_frames[0]
-    # peaks = find_peaks(plotDF)
 
 
     # plotDF = pd.DataFrame(data=trial, columns=["Time (s) E2-L1-319-T1", "Angle (rad) E2-L1-319-T1"])
 
     # sns.set_color_codes("pastel")
-    f, ax = plt.subplots(3, 1, figsize=(20, 10))
+    # f, ax = plt.subplots(3, 1, figsize=(20, 10))
+    f, ax = plt.subplots(1, 1, figsize=(6, 6))
 
-    # ax = plt.subplot(1, 2, 1)
+    # sns.set(font_scale=2.5)
 
-    # sns.scatterplot(ax=ax[0], data=trial_frames[0], x="Time", y="Angular_Velocity")
-    # sns.scatterplot(ax=ax[1], data=trial_frames[1], x="Time", y="Angular_Velocity")
-    # sns.scatterplot(ax=ax[2], data=trial_frames[2], x="Time", y="Angular_Velocity")
+    sns.scatterplot(ax=ax, x=params, y=all_means, label='original_data')
+    plt.errorbar(x=params, y=all_means, yerr=all_std, xerr=0.1, fmt='o', color='blue', ecolor='lightgray')
 
 
-    # sns.scatterplot(data=trial_frames[0], x="Time", y="Angle")
+    add_string = f'y = {reg_line.slope :.4f} * x + {reg_line.intercept :.4f}\n'
+    add_string += f'r^2 = {reg_line.rvalue :.4f}\n'
+    add_string += f'stderr = {reg_line.stderr :.6f}'
+
+    ax.text(10, 1.05, add_string, fontsize=8)
+
+
+    x_vals = np.array([np.amax(params), np.amin(params)])
+    y_vals = reg_line.intercept + reg_line.slope * x_vals
+
+    sns.lineplot(ax=ax, x=x_vals, y=y_vals, color="r", label=f'linear regression:\n{reg_line.slope :.4f} * x + {reg_line.intercept :.4f}')
+
+    plt.xlabel('Length of Pendulum (cm)')
+    plt.ylabel('Mean Period (sec)')
+    plt.title('Mean Period Against Length of Pendulum')
+
+    # ax.set(xlabel='Length of Pendulum (cm)', ylabel='Mean Period (sec)', title='Mean Period Against Length of Pendulum')
+    plt.legend()
     #
-    # # zero = peaks[0]
-    # for zero in peaks:
-    #     plt.scatter(x=zero['Time'], y=zero['Angle'], color='r')
-    i = 1
-
-    for c in range(3):
-        index = i * 3 + c
-        peaks = find_peaks(t1[index])
-        periods = calc_periods(peaks)
-        all_periods.append(periods)
-        sns.scatterplot(ax=ax[c], x=t1[index][:, 0], y=t1[index][:, 1])
-        sns.scatterplot(ax=ax[c], x=peaks[:, 0], y=peaks[:, 1], hue=peaks[:, 3], palette="ch:r=-.5,l=.75")
-
-
-    # sns.scatterplot(x=t1[0][:, 0], y=t1[0][:, 1])
-    # sns.scatterplot(x=peaks[:, 0], y=peaks[:, 1], hue=peaks[:, 3], palette="ch:r=-.5,l=.75")
-
-
-
-    # for i in range(3):
-    #     sns.scatterplot(ax=ax[i], data=trial_frames[i], x="Time", y="Angular_Velocity")
-    #     peaks = find_peaks(trial_frames[i])
-    #     print(peaks.columns)
+    # i = 1
     #
-    #     sns.scatterplot(ax=ax[i], data=peaks, x='Time', y='Angular_Velocity', color='r')
+    # for c in range(3):
+    #     index = i * 3 + c
+    #     peaks = find_peaks(t1[index])
+    #     periods = calc_periods(peaks)
+    #     all_periods.append(periods)
+    #     sns.scatterplot(ax=ax[c], x=t1[index][:, 0], y=t1[index][:, 1])
+    #     sns.scatterplot(ax=ax[c], x=peaks[:, 0], y=peaks[:, 1], hue=peaks[:, 3], palette="ch:r=-.5,l=.75")
 
-
-
-
-        # for zero in peaks:
-        #     sns.scatterplot(ax=ax[i], x=zero['Time'], y=zero['Angle'], color='r')
-
-
-    # ax[0, 0].set_title("test 1")
 
     plt.show()
-    # plt.figure()
 
-    # trial[0].plot(x='Time (s) E2-L1-319-T1 (4055, 7)', y='Acceleration (m/s²) E2-L1-319-T1')
 
 
 
