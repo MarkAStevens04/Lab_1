@@ -246,33 +246,33 @@ if __name__ == '__main__':
 
     # sns.set_color_codes("pastel")
     # f, ax = plt.subplots(3, 1, figsize=(20, 10))
-    f, ax = plt.subplots(2, 1, figsize=(10, 10))
+    f, ax = plt.subplots(1, 1, figsize=(10, 10))
 
     # sns.set(font_scale=2.5)
 
-    sns.scatterplot(ax=ax[0], x=params, y=all_means, label='original_data')
-    # plt.errorbar(x=params, y=all_means, yerr=all_std, xerr=0.1, fmt='.', color='blue', ecolor='lightgray')
+    sns.scatterplot(ax=ax, x=params, y=all_means, label='original_data')
+    plt.errorbar(x=params, y=all_means, yerr=all_std, xerr=(0.0005 ** 0.5), fmt='.', color='blue', ecolor='lightgray')
 
 
     add_string = f'y = {reg_line.slope :.4f} * x + {reg_line.intercept :.4f}\n'
     add_string += f'r^2 = {reg_line.rvalue :.4f}\n'
     add_string += f'stderr = {reg_line.stderr :.6f}'
 
-    ax[0].text(10, 1.05, add_string, fontsize=8)
+    ax.text(0.375, 1.05, add_string, fontsize=10)
 
 
     x_vals = np.array([np.amax(params), np.amin(params)])
     y_vals = reg_line.intercept + reg_line.slope * x_vals
     # y_vals = 0 + 2 * x_vals
 
-    sns.lineplot(ax=ax[0], x=x_vals, y=y_vals, color="r", label=f'linear regression:\n{reg_line.slope :.4f} * x + {reg_line.intercept :.4f}')
+    sns.lineplot(ax=ax, x=x_vals, y=y_vals, color="r", label=f'linear regression:\n{reg_line.slope :.4f} * x + {reg_line.intercept :.4f}')
 
     # plt.xlabel('Length of Pendulum (cm)')
     # plt.ylabel('Mean Period (sec)')
     # plt.title('Mean Period Against Length of Pendulum')
 
-    ax[0].set(xlabel='Length of Pendulum (cm)', ylabel='Mean Period (sec)', title='Mean Period Against Length of Pendulum')
-    sns.scatterplot(ax=ax[1], x=t1[0][:, 0], y=t1[0][:, 1])
+    ax.set(xlabel='Sqrt of Length of Pendulum (m^1/2)', ylabel='Mean Period (sec)', title='Mean Period Against Length of Pendulum')
+    # sns.scatterplot(ax=ax[1], x=t1[0][:, 0], y=t1[0][:, 1])
 
     plt.legend()
     plt.show()
