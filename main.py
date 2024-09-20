@@ -290,7 +290,7 @@ if __name__ == '__main__':
 
 
     params = np.array([0, 0, 0, 5, 5, 5, 10, 10, 10, 15, 15, 15, 20, 20, 20, 25, 25, 25, 30, 30, 30, 35, 35, 35, 40, 40, 40, 70, 70, 70])
-    # , 70, 70, 70
+    # For exercise 4, should do errors-in-variables regression
     p_error = 0.5
 
     # carries error through transformations
@@ -362,9 +362,12 @@ if __name__ == '__main__':
 
     # add little text with description of linear regression
     add_string = f'y = {reg_line.slope :.4f} * x + {reg_line.intercept :.4f}\n'
-    add_string += f'r^2 = {reg_line.rvalue :.4f}\n'
+    add_string += f'$r^2$ = {reg_line.rvalue :.4f}\n'
     add_string += f'stderr = {reg_line.stderr :.6f}'
-    ax.text(0.375, 1.05, add_string, fontsize=10)
+
+    # x and y are positions on graph where top left corner should be.
+    # x and y values are values of each variable (like 0.1 radians or something)
+    ax.text(1.0, 1.7, add_string, fontsize=10)
 
     # create values to plot linear regression line
     x_vals = np.array([np.amax(params), np.amin(params)])
@@ -374,7 +377,7 @@ if __name__ == '__main__':
     sns.lineplot(ax=ax, x=x_vals, y=y_vals, color="r", label=f'linear regression:\n{reg_line.slope :.4f} * x + {reg_line.intercept :.4f}')
 
     # label axis
-    ax.set(xlabel='Sqrt of Length of Pendulum (m^1/2)', ylabel='Mean Period (sec)', title='Mean Period Against Length of Pendulum')
+    ax.set(xlabel='Inverse Root Cosine of Inclination Angle  ($\\frac{1}{\\sqrt{cos(\\theta)}}$)', ylabel='Mean Period (sec)', title='Mean Period Against Inclination')
 
 
     plt.legend()
